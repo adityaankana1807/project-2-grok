@@ -14,15 +14,8 @@ export function encodeFeature(value: string | null): IfsTriple {
 }
 
 /**
- * INDRA generalized IFS similarity on a single feature.
- *
- * Addresses documented failures of Chen (1997), Ye (2011) and Hong–Kim (1999):
- *  1. uses hesitancy π, not just (μ, ν)
- *  2. signed (μ − ν) difference so complementary moves are not confused
- *  3. bounded in [0, 1] and S(A,A) = 1
- *
+ * Dutta–Banik generalized IFS similarity.
  * S = (2 − |Δμ| − |Δν|) / (2 + |Δπ|)  ·  (1 − 0.25 |Δs|)
- * where s = μ − ν is the signed score.
  */
 export function ifsSimilarity(a: IfsTriple, b: IfsTriple): number {
   const dMu = Math.abs(a.mu - b.mu);
@@ -35,10 +28,7 @@ export function ifsSimilarity(a: IfsTriple, b: IfsTriple): number {
   return clamp01(base * signed);
 }
 
-/**
- * Tonkin-style Jaccard on *observed* (non-null) values only.
- * Double-zeros / double-unknowns do not inflate similarity.
- */
+/** Jaccard on observed (non-null) values only. Double-unknowns do not inflate. */
 export function jaccardMo(a: MoFeature[], b: MoFeature[]): number {
   let inter = 0;
   let union = 0;
@@ -53,9 +43,23 @@ export function jaccardMo(a: MoFeature[], b: MoFeature[]): number {
 }
 
 /**
- * Nested IFS similarity across the MO vector, rarity-weighted.
- * Rare matching values (acid, firearm, climb) count more than “none”.
+ * Tonkin et al. 2025 low-base-rate metric: log(1 + 3 + 3a − (b+c)).
+ * Joint presence of rare behaviours is up-weighted 3× vs Jaccard.
  */
+export function tonkin2025(a: MoFeature[], b: MoFeature[]): number {
+  let both = 0;
+  let only = 0;
+  for (const key of MO_KEYS) {
+    const va = a.find((f) => f.key === key)?.value ?? null;
+    const vb = b.find((f) => f.key === key)?.value ?? null;
+    if (va === null || vb === null) continue;
+    if (va === vb && va !== "none") both += 1;
+    else only += 1;
+  }
+  const inner = 1 + 3 + 3 * both - only;
+  return Math.log(Math.max(inner, 1e-6));
+}
+
 export function indraIfsScore(a: MoFeature[], b: MoFeature[]): number {
   let num = 0;
   let den = 0;
@@ -71,10 +75,7 @@ export function indraIfsScore(a: MoFeature[], b: MoFeature[]): number {
 }
 
 function valueAgreement(fa: MoFeature, fb: MoFeature): number {
-  if (fa.value === null || fb.value === null) {
-    // Hesitant agreement: do not punish unknowns as mismatches.
-    return 0.72;
-  }
+  if (fa.value === null || fb.value === null) return 0.72;
   return fa.value === fb.value ? 1 : 0.35;
 }
 

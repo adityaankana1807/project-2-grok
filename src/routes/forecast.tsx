@@ -44,7 +44,8 @@ function ForecastPage() {
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         ST-lite rolls lag-1, seasonal lag-12, neighbours, festival intensity and monsoon one
         month forward from {monthLabel(model.universe.months, origin)}. Hit rate is the share of
-        true top-decile districts recovered in the predicted top-decile.
+        true top-decile districts recovered in the predicted top-decile. Forecast is a
+        watch-list, not a linkage score — TRIVENI keeps them separate.
       </p>
       <div className="mt-5">
         <KindSelect value={kind} onChange={setKind} />
@@ -65,17 +66,17 @@ function ForecastPage() {
           <CardContent className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stateBars} layout="vertical" margin={{ left: 16, right: 8 }}>
-                <XAxis type="number" tick={{ fill: "#8f918a", fontSize: 10 }} />
-                <YAxis type="category" dataKey="name" tick={{ fill: "#8f918a", fontSize: 10 }} width={92} />
+                <XAxis type="number" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} />
+                <YAxis type="category" dataKey="name" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} width={92} />
                 <Tooltip
                   contentStyle={{
-                    background: "#131413",
-                    border: "1px solid #262926",
-                    color: "#eceae4",
+                    background: "var(--color-card)",
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-foreground)",
                     fontSize: 12,
                   }}
                 />
-                <Bar dataKey="predicted" fill="#c8ccd4" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="predicted" fill="var(--color-primary)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

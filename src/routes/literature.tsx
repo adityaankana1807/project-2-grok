@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PAPERS } from "@/lib/data/papers";
+import { PRIOR_SYSTEMS } from "@/lib/triveni-paper";
 
 export const Route = createFileRoute("/literature")({ component: LiteraturePage });
 
@@ -9,15 +10,37 @@ function LiteraturePage() {
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
       <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Corpus</p>
       <h1 className="mt-1 font-display text-3xl font-medium md:text-4xl">
-        What the Drive folder taught INDRA
+        Drive folder, four repos, one LR
       </h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        Twenty-two papers on crime linkage, space–time clustering, near-repeats and Indian
-        CAW. Each stage of the nest cites a source; the India-specific pieces (SAE districts,
-        rape-cluster persistence, IFS from Dibrugarh, festival kernels, dark figure) are what
-        make this a new algorithm rather than a dashboard over someone else’s method.
+        Twenty-two papers on crime linkage, space–time clustering, near-repeats and Indian CAW.
+        Each stream of TRIVENI cites a source. The four prior GitHub systems used the same
+        corpus and still scored similarities or P(link). TRIVENI scores Λ.
       </p>
-      <ol className="mt-8 space-y-3">
+
+      <div className="mt-8 grid gap-3">
+        {PRIOR_SYSTEMS.map((p) => (
+          <Card key={p.name}>
+            <CardHeader>
+              <CardTitle className="text-base">{p.name}</CardTitle>
+              <CardDescription className="font-mono text-[11px]">{p.repo}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm text-muted-foreground">
+              <p>
+                <span className="text-foreground">Fusion.</span> {p.fusion}
+              </p>
+              <p>
+                <span className="text-foreground">India.</span> {p.india}
+              </p>
+              <p>
+                <span className="text-foreground">Gap.</span> {p.gap}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <ol className="mt-10 space-y-3">
         {PAPERS.map((p, i) => (
           <li key={p.title}>
             <Card>
@@ -27,7 +50,7 @@ function LiteraturePage() {
                 </p>
                 <CardTitle className="text-base leading-snug">{p.title}</CardTitle>
                 <CardDescription>
-                  {p.authors} · feeds {p.feeds}
+                  {p.authors} · {p.feeds}
                 </CardDescription>
               </CardHeader>
               <CardContent>

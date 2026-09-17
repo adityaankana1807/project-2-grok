@@ -69,21 +69,26 @@ function Atlas() {
             Command atlas
           </p>
           <h1 className="mt-1 font-display text-3xl font-medium tracking-tight md:text-4xl">
-            India nested district risk
+            Indian forensic case linkage
           </h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            INDRA fuses NCRB-calibrated small-area risk, space–time scan clusters, near-repeat
-            foraging and intuitionistic-fuzzy crime linkage — built for Indian districts, festivals
-            and underreporting, not UK or US grids.
+            TRIVENI scores a pair as a typology-mixed likelihood ratio — desh, kaal, riti,
+            patch — under FIR missingness, the IPC→BNS flip, and NCRB-calibrated district risk.
+            Not a UK model with the labels swapped.
           </p>
         </div>
         <div className="flex flex-wrap gap-3 text-sm">
           <Kpi label="Moran's I" value={formatNum(moran, 2)} />
           <Kpi label="High-risk districts" value={String(highCount)} />
           <Kpi
-            label="Linkage AUC"
+            label="log-Λ AUC"
             value={formatNum(linkage.indraAuc, 2)}
             hint={`Jaccard ${formatNum(linkage.jaccardAuc, 2)}`}
+          />
+          <Kpi
+            label="Recall@10"
+            value={formatNum(linkage.recallAt10, 2)}
+            hint={`MRR ${formatNum(linkage.mrr, 2)}`}
           />
         </div>
       </div>
@@ -99,7 +104,7 @@ function Atlas() {
             <div className="flex gap-1">
               {(
                 [
-                  ["rr", "INDRA RR"],
+                  ["rr", "SAE RR"],
                   ["sir", "Raw SIR"],
                   ["dark", "Dark-figure"],
                 ] as const
@@ -210,18 +215,18 @@ function Atlas() {
           <CardContent className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={national} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <XAxis dataKey="label" tick={{ fill: "#8f918a", fontSize: 10 }} interval={5} />
-                <YAxis tick={{ fill: "#8f918a", fontSize: 10 }} width={36} />
+                <XAxis dataKey="label" tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} interval={5} />
+                <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 10 }} width={36} />
                 <RTooltip
                   contentStyle={{
-                    background: "#131413",
-                    border: "1px solid #262926",
+                    background: "var(--color-card)",
+                    border: "1px solid var(--color-border)",
                     borderRadius: 8,
-                    color: "#eceae4",
+                    color: "var(--color-foreground)",
                     fontSize: 12,
                   }}
                 />
-                <Area type="monotone" dataKey="count" stroke="#c8ccd4" fill="rgba(200,204,212,0.15)" />
+                <Area type="monotone" dataKey="count" stroke="var(--color-primary)" fill="color-mix(in oklab, var(--color-primary) 18%, transparent)" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>

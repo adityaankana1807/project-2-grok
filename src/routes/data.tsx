@@ -29,15 +29,27 @@ function DataPage() {
       const r = model?.risks.find((x) => x.districtId === d.id);
       return [d.id, d.name, d.stateName, d.zone, d.lat, d.lng, d.popLakh, d.sexRatio, d.femLit, d.density, d.urban, r?.rr ?? "", r?.sir ?? "", r?.observed ?? "", r?.expected ?? ""].join(",");
     });
-    download("indra_districts.csv", header + rows.join("\n"));
+    download("triveni_districts.csv", header + rows.join("\n"));
   }
 
   function caseCsv() {
-    const header = "id,district,kind,date,lat,lng,series,urban\n";
+    const header = "id,district,kind,date,lat,lng,series,urban,statute,typology,narrative\n";
     const rows = universe.cases.map((c) =>
-      [c.id, c.districtId, c.kind, c.date, c.lat.toFixed(4), c.lng.toFixed(4), c.seriesId ?? "", c.urban].join(","),
+      [
+        c.id,
+        c.districtId,
+        c.kind,
+        c.date,
+        c.lat.toFixed(4),
+        c.lng.toFixed(4),
+        c.seriesId ?? "",
+        c.urban,
+        c.statute,
+        c.typology ?? "",
+        `"${c.narrative.replaceAll('"', "'")}"`,
+      ].join(","),
     );
-    download("indra_cases.csv", header + rows.join("\n"));
+    download("triveni_cases.csv", header + rows.join("\n"));
   }
 
   function stateCsv() {
@@ -91,8 +103,8 @@ function DataPage() {
           </p>
           <p>
             <span className="text-foreground">Planted series.</span> {universe.series.length} serial
-            offenders with consistent MO, 4–7 events, local foraging — the ground truth for
-            linkage AUC.
+            offenders typed as forager, marauder or commuter, 4–7 events, matching jitter — the
+            ground truth for log-Λ ranking. Statutes flip IPC → BNS on 1 July 2024.
           </p>
         </CardContent>
       </Card>

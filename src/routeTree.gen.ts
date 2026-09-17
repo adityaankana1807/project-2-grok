@@ -15,6 +15,8 @@ import { Route as DataRouteImport } from './routes/data'
 import { Route as ForecastRouteImport } from './routes/forecast'
 import { Route as LinkageRouteImport } from './routes/linkage'
 import { Route as LiteratureRouteImport } from './routes/literature'
+import { Route as PaperRouteImport } from './routes/paper'
+import { Route as SeriesRouteImport } from './routes/series'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +48,16 @@ const LiteratureRoute = LiteratureRouteImport.update({
   path: '/literature',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaperRoute = PaperRouteImport.update({
+  id: '/paper',
+  path: '/paper',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeriesRoute = SeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +66,8 @@ export interface FileRoutesByFullPath {
   '/forecast': typeof ForecastRoute
   '/linkage': typeof LinkageRoute
   '/literature': typeof LiteratureRoute
+  '/paper': typeof PaperRoute
+  '/series': typeof SeriesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +76,8 @@ export interface FileRoutesByTo {
   '/forecast': typeof ForecastRoute
   '/linkage': typeof LinkageRoute
   '/literature': typeof LiteratureRoute
+  '/paper': typeof PaperRoute
+  '/series': typeof SeriesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,13 +87,30 @@ export interface FileRoutesById {
   '/forecast': typeof ForecastRoute
   '/linkage': typeof LinkageRoute
   '/literature': typeof LiteratureRoute
+  '/paper': typeof PaperRoute
+  '/series': typeof SeriesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/algorithm' | '/data' | '/forecast' | '/linkage' | '/literature'
+    | '/'
+    | '/algorithm'
+    | '/data'
+    | '/forecast'
+    | '/linkage'
+    | '/literature'
+    | '/paper'
+    | '/series'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/algorithm' | '/data' | '/forecast' | '/linkage' | '/literature'
+  to:
+    | '/'
+    | '/algorithm'
+    | '/data'
+    | '/forecast'
+    | '/linkage'
+    | '/literature'
+    | '/paper'
+    | '/series'
   id:
     | '__root__'
     | '/'
@@ -86,6 +119,8 @@ export interface FileRouteTypes {
     | '/forecast'
     | '/linkage'
     | '/literature'
+    | '/paper'
+    | '/series'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,6 +130,8 @@ export interface RootRouteChildren {
   ForecastRoute: typeof ForecastRoute
   LinkageRoute: typeof LinkageRoute
   LiteratureRoute: typeof LiteratureRoute
+  PaperRoute: typeof PaperRoute
+  SeriesRoute: typeof SeriesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -141,6 +178,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LiteratureRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/paper': {
+      id: '/paper'
+      path: '/paper'
+      fullPath: '/paper'
+      preLoaderRoute: typeof PaperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/series': {
+      id: '/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -151,6 +202,8 @@ const rootRouteChildren: RootRouteChildren = {
   ForecastRoute: ForecastRoute,
   LinkageRoute: LinkageRoute,
   LiteratureRoute: LiteratureRoute,
+  PaperRoute: PaperRoute,
+  SeriesRoute: SeriesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

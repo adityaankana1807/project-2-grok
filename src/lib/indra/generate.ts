@@ -15,9 +15,10 @@ import type {
   MoFeature,
   MoKey,
   MonthKey,
+  Typology,
   Universe,
 } from "./types";
-import { CRIME_KINDS, MO_KEYS, MO_VALUES } from "./types";
+import { CRIME_KINDS, MO_KEYS, MO_VALUES, statuteFor } from "./types";
 import { encodeFeature } from "./ifs";
 import { jitter, mulberry32, pick, poisson, randInt, type Rng } from "./rng";
 
@@ -125,6 +126,62 @@ function jitterMo(rng: Rng, base: Record<MoKey, string | null>, pFlip: number): 
   return out;
 }
 
+/** Vernacular FIR tokens — Codex multilingual lexicon, used as traces not embeddings. */
+function narrative(
+  rng: Rng,
+  kind: CrimeKind,
+  feat: Record<MoKey, string | null>,
+  district: string,
+  statute: string,
+): string {
+  const bits: string[] = [`PS ${district}`, statute, kind];
+  if (feat.weapon === "firearm") bits.push(rng() < 0.5 ? "desi katta" : "tamancha");
+  if (feat.weapon === "acid") bits.push(rng() < 0.5 ? "tejab" : "acid vial");
+  if (feat.disguise === "mask") bits.push("nakabjani");
+  if (feat.entry === "climb") bits.push("diwar faand kar");
+  if (feat.entry === "door-force") bits.push("taala tod kar");
+  if (feat.transport === "motorcycle") bits.push(rng() < 0.5 ? "pulsar bike" : "two-wheeler");
+  if (feat.approach === "known-lure") bits.push("reiki ke baad");
+  if (feat.location) bits.push(feat.location);
+  if (feat.timeBand) bits.push(feat.timeBand);
+  return bits.join(" · ");
+}
+
+function makeCase(
+  id: string,
+  d: District,
+  kind: CrimeKind,
+  year: number,
+  month: number,
+  day: number,
+  lat: number,
+  lng: number,
+  feat: Record<MoKey, string | null>,
+  seriesId: string | null,
+  typology: Typology | null,
+  rng: Rng,
+): CaseRecord {
+  const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const statute = statuteFor(kind, date);
+  return {
+    id,
+    districtId: d.id,
+    kind,
+    year,
+    month,
+    day,
+    date,
+    lat,
+    lng,
+    features: encodeMo(feat),
+    seriesId,
+    urban: d.urban > 40,
+    narrative: narrative(rng, kind, feat, d.name, statute),
+    statute,
+    typology,
+  };
+}
+
 export function generateUniverse(seed = 2026): Universe {
   const rng = mulberry32(seed);
   const months = buildMonths();
@@ -147,9 +204,6 @@ export function generateUniverse(seed = 2026): Universe {
             ? d.femalePopLakh
             : d.popLakh;
         const rate = expectedRate(kind, d.state);
-        // Offset (SAE expected): population × state rate × calendar/exposure.
-        // District residual (riskBias, sex ratio, density) stays in λ so RR
-        // isolates the hotspot structure instead of lighting up every cell.
         let expo = pop * rate * yearDrift * covid;
         expo *= 0.75 + 0.5 * (d.urban / 100);
         if (kind === "caw" || kind === "rape") {
@@ -194,27 +248,31 @@ export function generateUniverse(seed = 2026): Universe {
       const unknownRate = 0.12 + (STATE_BY_CODE[d.state]!.darkFigure - 1.3) * 0.08;
       const day = randInt(rng, 1, 28);
       const feat = randomMo(rng, kind, unknownRate);
-      cases.push({
-        id: `C${String(++caseSeq).padStart(4, "0")}`,
-        districtId: d.id,
-        kind,
-        year: m.year,
-        month: m.month,
-        day,
-        date: `${m.year}-${String(m.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-        lat: jitter(rng, d.lat, 0.12),
-        lng: jitter(rng, d.lng, 0.12),
-        features: encodeMo(feat),
-        seriesId: null,
-        urban: d.urban > 40,
-      });
+      cases.push(
+        makeCase(
+          `C${String(++caseSeq).padStart(4, "0")}`,
+          d,
+          kind,
+          m.year,
+          m.month,
+          day,
+          jitter(rng, d.lat, 0.12),
+          jitter(rng, d.lng, 0.12),
+          feat,
+          null,
+          null,
+          rng,
+        ),
+      );
     }
   }
 
   const serialHosts = districts.filter((d) => d.riskBias >= 1.15 && d.urban > 30);
-  for (let s = 0; s < 16; s++) {
+  const types: Typology[] = ["forager", "marauder", "commuter"];
+  for (let s = 0; s < 18; s++) {
     const host = serialHosts[s % serialHosts.length]!;
     const kind = pick(rng, ["caw", "rape", "burglary"] as CrimeKind[]);
+    const typology = types[s % 3]!;
     const baseMo = randomMo(rng, kind, 0.05);
     const len = randInt(rng, 4, 7);
     const id = `S${String(s + 1).padStart(2, "0")}`;
@@ -222,30 +280,39 @@ export function generateUniverse(seed = 2026): Universe {
     const caseIds: string[] = [];
     let lat = host.lat;
     let lng = host.lng;
+    const step =
+      typology === "forager" ? 0.025 : typology === "marauder" ? 0.07 : 0.18;
     for (let k = 0; k < len; k++) {
       const mi = Math.min(months.length - 1, startMonth + Math.floor(k * (rng() * 1.4)));
       const m = months[mi]!;
       const day = randInt(rng, 1, 28);
-      lat = jitter(rng, lat, host.urban > 60 ? 0.04 : 0.08);
-      lng = jitter(rng, lng, host.urban > 60 ? 0.04 : 0.08);
+      if (typology === "commuter") {
+        lng = jitter(rng, lng, step);
+        lat = jitter(rng, lat, step * 0.35);
+      } else {
+        lat = jitter(rng, lat, step);
+        lng = jitter(rng, lng, step);
+      }
       const idc = `C${String(++caseSeq).padStart(4, "0")}`;
-      cases.push({
-        id: idc,
-        districtId: host.id,
-        kind,
-        year: m.year,
-        month: m.month,
-        day,
-        date: `${m.year}-${String(m.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-        lat,
-        lng,
-        features: encodeMo(jitterMo(rng, baseMo, 0.12)),
-        seriesId: id,
-        urban: host.urban > 40,
-      });
+      cases.push(
+        makeCase(
+          idc,
+          host,
+          kind,
+          m.year,
+          m.month,
+          day,
+          lat,
+          lng,
+          jitterMo(rng, baseMo, typology === "forager" ? 0.08 : 0.14),
+          id,
+          typology,
+          rng,
+        ),
+      );
       caseIds.push(idc);
     }
-    series.push({ id, caseIds, kind });
+    series.push({ id, caseIds, kind, typology });
   }
 
   return { seed, months, districts, neighbors, cells, cases, series };

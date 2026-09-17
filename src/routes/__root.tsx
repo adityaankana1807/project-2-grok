@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "INDRA";
+const APP_NAME = "TRIVENI";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -16,9 +16,9 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "INDRA — India Nested District Risk & Association. A research atlas for NCRB-calibrated crime risk, linkage and forecast.",
+          "TRIVENI — typology-conditional likelihood ratios for Indian crime linkage under FIR missingness.",
       },
-      { name: "theme-color", content: "#0b0c0b" },
+      { name: "theme-color", content: "#0c0d0b" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

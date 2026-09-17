@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { KindSelect } from "@/components/kind-select";
-import { MO_LABEL } from "@/lib/indra/types";
-import { rankAgainst } from "@/lib/indra/linkage";
+import { MO_LABEL, TYPOLOGY_LABEL } from "@/lib/indra/types";
+import { displayProb, explainScore, rankAgainst, saturateLr } from "@/lib/indra/linkage";
 import { useModel } from "@/lib/indra/use-model";
 import { useApp } from "@/lib/store";
 import { formatNum } from "@/lib/utils";
@@ -21,36 +21,33 @@ function LinkagePage() {
   const { model } = useModel(kind);
   const [q, setQ] = useState("");
 
-  const pool = useMemo(
-    () => {
-      return model.universe.cases
-        .filter((c) => c.kind === kind)
-        .filter((c) => {
-          if (!q) return true;
-          const d = model.universe.districts.find((x) => x.id === c.districtId);
-          const hay = `${c.id} ${d?.name} ${c.seriesId ?? ""} ${c.date}`.toLowerCase();
-          return hay.includes(q.toLowerCase());
-        })
-        .slice()
-        .sort((a, b) => b.date.localeCompare(a.date));
-    },
-    [model, kind, q],
-  );
+  const pool = useMemo(() => {
+    return model.universe.cases
+      .filter((c) => c.kind === kind)
+      .filter((c) => {
+        if (!q) return true;
+        const d = model.universe.districts.find((x) => x.id === c.districtId);
+        const hay = `${c.id} ${d?.name} ${c.seriesId ?? ""} ${c.date} ${c.statute} ${c.narrative}`.toLowerCase();
+        return hay.includes(q.toLowerCase());
+      })
+      .slice()
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [model, kind, q]);
 
   const target = pool.find((c) => c.id === selectedCaseId) ?? pool.find((c) => c.seriesId) ?? pool[0];
   const ranks = useMemo(() => {
     if (!target) return [];
-    return rankAgainst(target, model.universe, model.risks).slice(0, 12);
+    return rankAgainst(target, model.universe, model.risks, model.clusters).slice(0, 12);
   }, [target, model]);
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-6">
       <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Workbench</p>
-      <h1 className="mt-1 font-display text-3xl font-medium md:text-4xl">Crime linkage</h1>
+      <h1 className="mt-1 font-display text-3xl font-medium md:text-4xl">Likelihood-ratio linkage</h1>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Sixteen planted serial series sit inside the synthetic caseload. Pick an index offence —
-        INDRA ranks candidates by nested IFS + geo-temporal + forager score. Jaccard is shown
-        as the literature baseline (Tonkin 2025).
+        Eighteen planted series — forager, marauder, commuter — sit inside the synthetic
+        caseload. Pick an index offence. TRIVENI ranks SAE-blocked candidates by log Λ, not by
+        a blended similarity. Jaccard is the literature baseline.
       </p>
       <div className="mt-5">
         <KindSelect value={kind} onChange={setKind} />
@@ -64,13 +61,13 @@ function LinkagePage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Input
-              placeholder="Search id, district, series…"
+              placeholder="Search id, district, series, statute…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
             <div className="max-h-[28rem] space-y-1 overflow-auto pr-1">
               {pool.slice(0, 80).map((c) => {
-                const d = model?.universe.districts.find((x) => x.id === c.districtId);
+                const d = model.universe.districts.find((x) => x.id === c.districtId);
                 const active = target?.id === c.id;
                 return (
                   <button
@@ -78,7 +75,7 @@ function LinkagePage() {
                     type="button"
                     onClick={() => selectCase(c.id)}
                     className={
-                      "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm " +
+                      "flex min-h-11 w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm " +
                       (active ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-secondary")
                     }
                   >
@@ -101,15 +98,20 @@ function LinkagePage() {
           {target && (
             <Card>
               <CardHeader>
-                <CardTitle>
-                  Ranked against {target.id}
-                </CardTitle>
+                <CardTitle>Ranked against {target.id}</CardTitle>
                 <CardDescription>
-                  {model?.universe.districts.find((d) => d.id === target.districtId)?.name} · {target.date}
-                  {target.seriesId ? ` · planted series ${target.seriesId}` : " · singleton"}
+                  {model.universe.districts.find((d) => d.id === target.districtId)?.name} · {target.date}
+                  {" · "}
+                  {target.statute}
+                  {target.seriesId
+                    ? ` · planted ${target.seriesId} (${target.typology ? TYPOLOGY_LABEL[target.typology] : "typed"})`
+                    : " · singleton"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                {ranks.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No blocked candidates in this window.</p>
+                )}
                 {ranks.map((s, i) => {
                   const other = model.universe.cases.find((c) => c.id === s.b)!;
                   const d = model.universe.districts.find((x) => x.id === other.districtId);
@@ -129,16 +131,24 @@ function LinkagePage() {
                         <div className="flex items-center gap-2">
                           {s.linked && <Badge variant="high">true link</Badge>}
                           <span className="font-mono text-sm tabular-nums">
-                            {formatNum(s.indra, 3)}
+                            log Λ {formatNum(s.logLr, 2)}
                           </span>
                         </div>
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-muted-foreground sm:grid-cols-5">
-                        <Bar label="Geo" v={s.geo} />
-                        <Bar label="Time" v={s.time} />
-                        <Bar label="IFS" v={s.ifs} />
-                        <Bar label="Jaccard" v={s.jaccard} />
-                        <Bar label="Forager" v={s.forager} />
+                      <p className="mt-1 text-[11px] text-muted-foreground">{explainScore(s)}</p>
+                      <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-muted-foreground sm:grid-cols-4">
+                        <LrBar label="Desh" v={s.desh} />
+                        <LrBar label="Kaal" v={s.kaal} />
+                        <LrBar label="Riti" v={s.riti} />
+                        <LrBar label="Patch" v={s.patch} />
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+                        <span>support {formatNum(displayProb(s.logLr), 2)}</span>
+                        <span>Jaccard {formatNum(s.jaccard, 2)}</span>
+                        <span>
+                          mix F{formatNum(s.mix.forager, 2)} M{formatNum(s.mix.marauder, 2)} C
+                          {formatNum(s.mix.commuter, 2)}
+                        </span>
                       </div>
                     </div>
                   );
@@ -151,7 +161,9 @@ function LinkagePage() {
             <Card>
               <CardHeader>
                 <CardTitle>MO encoding</CardTitle>
-                <CardDescription>Hesitancy π is missingness, not absence</CardDescription>
+                <CardDescription>
+                  Hesitancy π is missingness, not absence · {target.narrative}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -187,7 +199,8 @@ function LinkagePage() {
   );
 }
 
-function Bar({ label, v }: { label: string; v: number }) {
+function LrBar({ label, v }: { label: string; v: number }) {
+  const sat = saturateLr(v);
   return (
     <div>
       <div className="flex justify-between">
@@ -195,7 +208,7 @@ function Bar({ label, v }: { label: string; v: number }) {
         <span className="font-mono tabular-nums">{formatNum(v, 2)}</span>
       </div>
       <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-background">
-        <div className="h-full bg-accent" style={{ width: `${Math.round(v * 100)}%` }} />
+        <div className="h-full bg-accent" style={{ width: `${Math.round(sat * 100)}%` }} />
       </div>
     </div>
   );

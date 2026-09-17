@@ -35,6 +35,34 @@ export const CRIME_KINDS: CrimeKind[] = [
   "kidnapping",
 ];
 
+/** IPC 1860 ↔ BNS 2023 family used for cross-crime blocking after 1 July 2024. */
+export const STATUTE: Record<CrimeKind, { ipc: string; bns: string; family: string }> = {
+  caw: { ipc: "IPC 498A", bns: "BNS 85", family: "violence-women" },
+  rape: { ipc: "IPC 376", bns: "BNS 64", family: "violence-women" },
+  kidnapping: { ipc: "IPC 363", bns: "BNS 137", family: "violence-women" },
+  burglary: { ipc: "IPC 457", bns: "BNS 331", family: "property" },
+  theft: { ipc: "IPC 379", bns: "BNS 303", family: "property" },
+  murder: { ipc: "IPC 302", bns: "BNS 103", family: "person" },
+  cyber: { ipc: "IT Act 66", bns: "BNS 318", family: "cyber" },
+};
+
+export function statuteFor(kind: CrimeKind, date: string): string {
+  return date >= "2024-07-01" ? STATUTE[kind].bns : STATUTE[kind].ipc;
+}
+
+export function crimeCompatible(a: CrimeKind, b: CrimeKind): boolean {
+  if (a === b) return true;
+  return STATUTE[a].family === STATUTE[b].family;
+}
+
+export type Typology = "forager" | "marauder" | "commuter";
+
+export const TYPOLOGY_LABEL: Record<Typology, string> = {
+  forager: "Forager",
+  marauder: "Marauder",
+  commuter: "Commuter",
+};
+
 export type MoKey =
   | "approach"
   | "location"
@@ -128,7 +156,6 @@ export type DistrictSeed = {
   femLit: number;
   density: number;
   urban: number;
-  /** Relative intensity vs state mean — from SAE hotspot literature. */
   riskBias: number;
 };
 
@@ -162,6 +189,9 @@ export type CaseRecord = {
   features: MoFeature[];
   seriesId: string | null;
   urban: boolean;
+  narrative: string;
+  statute: string;
+  typology: Typology | null;
 };
 
 export type DistrictRisk = {
@@ -202,12 +232,14 @@ export type LinkScore = {
   forager: number;
   festival: number;
   indra: number;
+  desh: number;
+  kaal: number;
+  riti: number;
+  patch: number;
+  lambda: number;
+  logLr: number;
+  mix: { forager: number; marauder: number; commuter: number };
   linked: boolean;
-};
-
-export type PairBreakdown = LinkScore & {
-  caseA: CaseRecord;
-  caseB: CaseRecord;
 };
 
 export type ForecastPoint = {
@@ -232,6 +264,8 @@ export type EvalMetrics = {
     medianFirstRankJaccard: number;
     nLinked: number;
     nUnlinked: number;
+    recallAt10: number;
+    mrr: number;
   };
   forecast: {
     mae: number;
@@ -252,7 +286,7 @@ export type Universe = {
   neighbors: number[][];
   cells: Cell[];
   cases: CaseRecord[];
-  series: { id: string; caseIds: string[]; kind: CrimeKind }[];
+  series: { id: string; caseIds: string[]; kind: CrimeKind; typology: Typology }[];
 };
 
 export type IndraModel = {

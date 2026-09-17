@@ -2,9 +2,22 @@ import type { CrimeKind, IndraModel, Universe } from "./types";
 import { getUniverse } from "./generate";
 import { moransI, relativeRisk } from "./bym";
 import { spaceTimeScan } from "./scan";
-import { sampleEvaluationPairs } from "./linkage";
+import { sampleEvaluationPairs } from "./triveni";
 import { forecastKind } from "./forecast";
 import { evaluateForecast, evaluateLinkage } from "./evaluate";
+
+export function atlasView(universe: Universe, kind: CrimeKind, origin: number) {
+  const risks = relativeRisk(universe, kind, origin);
+  const clusters = spaceTimeScan(universe, kind, origin);
+  const rr = risks.map((r) => r.rr);
+  const highCount = risks.filter((r) => r.band === "high").length;
+  return {
+    risks,
+    clusters,
+    moran: moransI(rr, universe.neighbors),
+    highCount,
+  };
+}
 
 export function runIndra(kind: CrimeKind, seed = 2026, uptoMonth?: number): IndraModel {
   const universe = getUniverse(seed);
@@ -12,7 +25,7 @@ export function runIndra(kind: CrimeKind, seed = 2026, uptoMonth?: number): Indr
   const risks = relativeRisk(universe, kind, origin);
   const clusters = spaceTimeScan(universe, kind, origin);
   const forecast = forecastKind(universe, kind, origin, 3);
-  const pairs = sampleEvaluationPairs(universe, risks);
+  const pairs = sampleEvaluationPairs(universe, risks, clusters);
   const linkage = evaluateLinkage(pairs);
   const forecastM = evaluateForecast(forecast);
   const rr = risks.map((r) => r.rr);
@@ -34,29 +47,15 @@ export function runIndra(kind: CrimeKind, seed = 2026, uptoMonth?: number): Indr
   };
 }
 
-const modelCache = new Map<string, IndraModel>(); // keyed by kind:seed
+const modelCache = new Map<string, IndraModel>();
 
 export function getModel(kind: CrimeKind, seed = 2026): IndraModel {
-  const key = `${kind}:${seed}`;
+  const key = `triveni:${kind}:${seed}`;
   const hit = modelCache.get(key);
   if (hit) return hit;
   const model = runIndra(kind, seed);
   modelCache.set(key, model);
   return model;
-}
-
-/** First-paint atlas slice — risk + scan only, no linkage eval. */
-export function atlasView(universe: Universe, kind: CrimeKind, origin: number) {
-  const risks = relativeRisk(universe, kind, origin);
-  const clusters = spaceTimeScan(universe, kind, origin);
-  const rr = risks.map((r) => r.rr);
-  const highCount = risks.filter((r) => r.band === "high").length;
-  return {
-    risks,
-    clusters,
-    moran: moransI(rr, universe.neighbors),
-    highCount,
-  };
 }
 
 export function nationalObserved(universe: Universe, kind: CrimeKind, monthIndex: number): number {
