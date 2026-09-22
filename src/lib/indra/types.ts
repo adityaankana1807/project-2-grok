@@ -35,7 +35,7 @@ export const CRIME_KINDS: CrimeKind[] = [
   "kidnapping",
 ];
 
-/** IPC 1860 ↔ BNS 2023 family used for cross-crime blocking after 1 July 2024. */
+/** IPC 1860 ↔ BNS 2023 family used for cross-crime scoring after 1 July 2024. */
 export const STATUTE: Record<CrimeKind, { ipc: string; bns: string; family: string }> = {
   caw: { ipc: "IPC 498A", bns: "BNS 85", family: "violence-women" },
   rape: { ipc: "IPC 376", bns: "BNS 64", family: "violence-women" },
@@ -242,6 +242,71 @@ export type LinkScore = {
   linked: boolean;
 };
 
+export type SprtDecision = "open" | "hold" | "reject";
+
+export type AssignmentScore = {
+  queryId: string;
+  seriesId: string;
+  logBf: number;
+  mo: number;
+  geo: number;
+  time: number;
+  family: number;
+  patch: number;
+  consistency: number;
+  distinctiveness: number;
+  coverage: number;
+  dark: number;
+  sprt: SprtDecision;
+  trueSeries: boolean;
+};
+
+export type DiscoverAction = "join" | "new";
+
+export type DiscoverStep = {
+  caseId: string;
+  date: string;
+  tableId: string;
+  action: DiscoverAction;
+  logPost: number;
+  logNew: number;
+  logBf: number;
+  nTables: number;
+  trueSeries: string | null;
+  dark: number;
+  family: number;
+};
+
+export type LiveTable = {
+  id: string;
+  caseIds: string[];
+};
+
+export type PartitionResult = {
+  steps: DiscoverStep[];
+  tables: LiveTable[];
+  labels: Record<string, string>;
+  metrics: {
+    ari: number;
+    greedyAri: number;
+    singletonPrecision: number;
+    recoveredSeries: number;
+    nTables: number;
+    nPool: number;
+    nSeriesTruth: number;
+    overSeg: number;
+    underSeg: number;
+  };
+};
+
+export type SeriesRecord = {
+  id: string;
+  caseIds: string[];
+  kind: CrimeKind;
+  typology: Typology;
+  versatile: boolean;
+};
+
 export type ForecastPoint = {
   districtId: string;
   monthIndex: number;
@@ -266,6 +331,20 @@ export type EvalMetrics = {
     nUnlinked: number;
     recallAt10: number;
     mrr: number;
+    assignHit1: number;
+    assignHit3: number;
+    assignMrr: number;
+    jaccardHit1: number;
+    nQueries: number;
+    versatileHit1: number;
+    ari: number;
+    greedyAri: number;
+    singletonPrecision: number;
+    recoveredSeries: number;
+    nTables: number;
+    nPool: number;
+    overSeg: number;
+    underSeg: number;
   };
   forecast: {
     mae: number;
@@ -286,7 +365,7 @@ export type Universe = {
   neighbors: number[][];
   cells: Cell[];
   cases: CaseRecord[];
-  series: { id: string; caseIds: string[]; kind: CrimeKind; typology: Typology }[];
+  series: SeriesRecord[];
 };
 
 export type IndraModel = {
@@ -295,4 +374,5 @@ export type IndraModel = {
   clusters: ScanCluster[];
   forecast: ForecastPoint[];
   metrics: EvalMetrics;
+  partition: PartitionResult;
 };

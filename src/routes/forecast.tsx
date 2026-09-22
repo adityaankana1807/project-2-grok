@@ -45,7 +45,7 @@ function ForecastPage() {
         ST-lite rolls lag-1, seasonal lag-12, neighbours, festival intensity and monsoon one
         month forward from {monthLabel(model.universe.months, origin)}. Hit rate is the share of
         true top-decile districts recovered in the predicted top-decile. Forecast is a
-        watch-list, not a linkage score — TRIVENI keeps them separate.
+        watch-list, not a linkage score — SAMHITA keeps them separate.
       </p>
       <div className="mt-5">
         <KindSelect value={kind} onChange={setKind} />

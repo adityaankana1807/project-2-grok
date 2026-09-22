@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "TRIVENI";
+const APP_NAME = "SAMHITA";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -16,9 +16,9 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "TRIVENI — typology-conditional likelihood ratios for Indian crime linkage under FIR missingness.",
+          "SAMHITA — infinite-table series discovery for Indian crime linkage under dark-figure occupancy and modus drift.",
       },
-      { name: "theme-color", content: "#0c0d0b" },
+      { name: "theme-color", content: "#16120c" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

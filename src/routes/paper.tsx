@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useModel } from "@/lib/indra/use-model";
-import { useApp } from "@/lib/store";
 import { formatNum, formatPct } from "@/lib/utils";
-import { EQUATIONS, PAPER, PRIOR_SYSTEMS, SECTIONS } from "@/lib/triveni-paper";
+import { EQUATIONS, PAPER, PRIOR_SYSTEMS, SECTIONS } from "@/lib/samhita-paper";
 
 export const Route = createFileRoute("/paper")({ component: PaperPage });
 
 function PaperPage() {
-  const kind = useApp((s) => s.kind);
-  const { model } = useModel(kind);
+  const { model } = useModel("caw");
   const L = model.metrics.linkage;
 
   return (
@@ -38,14 +36,14 @@ function PaperPage() {
       </section>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-4">
-        <LiveStat label="log-Λ AUC" value={formatNum(L.indraAuc, 3)} />
-        <LiveStat label="Jaccard AUC" value={formatNum(L.jaccardAuc, 3)} />
-        <LiveStat label="Recall@10" value={formatPct(L.recallAt10, 0)} />
-        <LiveStat label="MRR" value={formatNum(L.mrr, 2)} />
+        <LiveStat label="Partition ARI" value={formatNum(L.ari, 3)} />
+        <LiveStat label="SPRT-greedy ARI" value={formatNum(L.greedyAri, 3)} />
+        <LiveStat label="Recovered" value={formatPct(L.recoveredSeries, 0)} />
+        <LiveStat label="Singleton prec." value={formatNum(L.singletonPrecision, 2)} />
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">
-        Live on this seed, crime head {kind}, {L.nLinked} linked / {L.nUnlinked} unlinked pairs.
-        Synthetic. Not a court exhibit.
+        Mixed pool of {L.nPool} FIRs, {L.nTables} tables. Over-seg {formatNum(L.overSeg, 2)},
+        under-seg {formatNum(L.underSeg, 2)}. Synthetic. Not a court exhibit.
       </p>
 
       {SECTIONS.map((s) => (
@@ -79,7 +77,7 @@ function PaperPage() {
 
       <section className="mt-12">
         <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">08 · Priors</p>
-        <h2 className="mt-1 font-display text-2xl">Four repositories, one hole</h2>
+        <h2 className="mt-1 font-display text-2xl">Six repositories, no compiler</h2>
         <Card className="mt-4">
           <CardHeader>
             <CardTitle>Fusion compared</CardTitle>

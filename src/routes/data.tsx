@@ -29,7 +29,7 @@ function DataPage() {
       const r = model?.risks.find((x) => x.districtId === d.id);
       return [d.id, d.name, d.stateName, d.zone, d.lat, d.lng, d.popLakh, d.sexRatio, d.femLit, d.density, d.urban, r?.rr ?? "", r?.sir ?? "", r?.observed ?? "", r?.expected ?? ""].join(",");
     });
-    download("triveni_districts.csv", header + rows.join("\n"));
+    download("samhita_districts.csv", header + rows.join("\n"));
   }
 
   function caseCsv() {
@@ -49,7 +49,7 @@ function DataPage() {
         `"${c.narrative.replaceAll('"', "'")}"`,
       ].join(","),
     );
-    download("triveni_cases.csv", header + rows.join("\n"));
+    download("samhita_cases.csv", header + rows.join("\n"));
   }
 
   function stateCsv() {
@@ -102,9 +102,10 @@ function DataPage() {
             Durga Puja (year-specific), monsoon, summer street factor, 2020–21 lockdown dip.
           </p>
           <p>
-            <span className="text-foreground">Planted series.</span> {universe.series.length} serial
-            offenders typed as forager, marauder or commuter, 4–7 events, matching jitter — the
-            ground truth for log-Λ ranking. Statutes flip IPC → BNS on 1 July 2024.
+            <span className="text-foreground">Planted series.</span> {universe.series.length} dockets:
+            18 typed (forager / marauder / commuter) plus 4 versatile burglary→CAW/rape series with
+            NFHS-stretched gaps — the ground truth for mixed-pool partition, not pairwise ranking.
+            Statutes flip IPC → BNS on 1 July 2024.
           </p>
         </CardContent>
       </Card>

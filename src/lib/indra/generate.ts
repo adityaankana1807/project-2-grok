@@ -282,8 +282,12 @@ export function generateUniverse(seed = 2026): Universe {
     let lng = host.lng;
     const step =
       typology === "forager" ? 0.025 : typology === "marauder" ? 0.07 : 0.18;
+    const dark = STATE_BY_CODE[host.state]!.darkFigure;
     for (let k = 0; k < len; k++) {
-      const mi = Math.min(months.length - 1, startMonth + Math.floor(k * (rng() * 1.4)));
+      const mi = Math.min(
+        months.length - 1,
+        startMonth + Math.floor(k * (0.55 + 0.55 * dark) * (0.7 + rng() * 0.9)),
+      );
       const m = months[mi]!;
       const day = randInt(rng, 1, 28);
       if (typology === "commuter") {
@@ -312,17 +316,75 @@ export function generateUniverse(seed = 2026): Universe {
       );
       caseIds.push(idc);
     }
-    series.push({ id, caseIds, kind, typology });
+    series.push({ id, caseIds, kind, typology, versatile: false });
+  }
+
+  for (let s = 0; s < 4; s++) {
+    const host = serialHosts[(s + 7) % serialHosts.length]!;
+    const typology: Typology = s % 2 === 0 ? "marauder" : "commuter";
+    const dark = STATE_BY_CODE[host.state]!.darkFigure;
+    const startKind: CrimeKind = "burglary";
+    const laterKind: CrimeKind = pick(rng, ["caw", "rape"]);
+    const baseMo = randomMo(rng, startKind, 0.05);
+    const len = randInt(rng, 5, 7);
+    const id = `S${String(19 + s).padStart(2, "0")}`;
+    const startMonth = randInt(rng, 36, 58);
+    const caseIds: string[] = [];
+    let lat = host.lat;
+    let lng = host.lng;
+    const step = typology === "commuter" ? 0.16 : 0.07;
+    for (let k = 0; k < len; k++) {
+      const kindNow: CrimeKind = k < 2 ? startKind : laterKind;
+      const mi = Math.min(
+        months.length - 1,
+        startMonth + Math.floor(k * (0.7 + 0.5 * dark)),
+      );
+      const m = months[mi]!;
+      const feat = jitterMo(rng, baseMo, 0.1);
+      if (kindNow !== startKind) {
+        feat.entry = rng() < 0.5 ? feat.entry : "none";
+        feat.theft = rng() < 0.4 ? "none" : feat.theft;
+      }
+      if (typology === "commuter") {
+        lng = jitter(rng, lng, step);
+        lat = jitter(rng, lat, step * 0.4);
+      } else {
+        lat = jitter(rng, lat, step);
+        lng = jitter(rng, lng, step);
+      }
+      const idc = `C${String(++caseSeq).padStart(4, "0")}`;
+      cases.push(
+        makeCase(
+          idc,
+          host,
+          kindNow,
+          m.year,
+          m.month,
+          randInt(rng, 1, 28),
+          lat,
+          lng,
+          feat,
+          id,
+          typology,
+          rng,
+        ),
+      );
+      caseIds.push(idc);
+    }
+    series.push({ id, caseIds, kind: startKind, typology, versatile: true });
   }
 
   return { seed, months, districts, neighbors, cells, cases, series };
 }
 
 let cached: Universe | null = null;
+let cachedGen = 0;
+const GEN = 3;
 
 export function getUniverse(seed = 2026): Universe {
-  if (cached && cached.seed === seed) return cached;
+  if (cached && cached.seed === seed && cachedGen === GEN) return cached;
   cached = generateUniverse(seed);
+  cachedGen = GEN;
   return cached;
 }
 

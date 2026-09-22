@@ -69,26 +69,26 @@ function Atlas() {
             Command atlas
           </p>
           <h1 className="mt-1 font-display text-3xl font-medium tracking-tight md:text-4xl">
-            Indian forensic case linkage
+            Infinite-table series discovery
           </h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            TRIVENI scores a pair as a typology-mixed likelihood ratio — desh, kaal, riti,
-            patch — under FIR missingness, the IPC→BNS flip, and NCRB-calibrated district risk.
-            Not a UK model with the labels swapped.
+            SAMHITA compiles FIRs into an unknown number of tables — Chinese-restaurant
+            allocation, dark-figure occupancy, 140-day MO drift. Pairwise LR and known-docket
+            assignment are the previous algorithms. This one starts from an empty caseload.
           </p>
         </div>
         <div className="flex flex-wrap gap-3 text-sm">
           <Kpi label="Moran's I" value={formatNum(moran, 2)} />
           <Kpi label="High-risk districts" value={String(highCount)} />
           <Kpi
-            label="log-Λ AUC"
-            value={formatNum(linkage.indraAuc, 2)}
-            hint={`Jaccard ${formatNum(linkage.jaccardAuc, 2)}`}
+            label="Partition ARI"
+            value={formatNum(linkage.ari, 2)}
+            hint={`SPRT greedy ${formatNum(linkage.greedyAri, 2)}`}
           />
           <Kpi
-            label="Recall@10"
-            value={formatNum(linkage.recallAt10, 2)}
-            hint={`MRR ${formatNum(linkage.mrr, 2)}`}
+            label="Series recovered"
+            value={formatNum(linkage.recoveredSeries, 2)}
+            hint={`${linkage.nTables} tables · ${linkage.nPool} FIRs`}
           />
         </div>
       </div>

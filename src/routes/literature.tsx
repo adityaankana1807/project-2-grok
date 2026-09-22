@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PAPERS } from "@/lib/data/papers";
-import { PRIOR_SYSTEMS } from "@/lib/triveni-paper";
+import { PRIOR_SYSTEMS } from "@/lib/samhita-paper";
 
 export const Route = createFileRoute("/literature")({ component: LiteraturePage });
 
@@ -10,12 +10,13 @@ function LiteraturePage() {
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
       <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Corpus</p>
       <h1 className="mt-1 font-display text-3xl font-medium md:text-4xl">
-        Drive folder, four repos, one LR
+        Drive folder, six priors, one compiler
       </h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Twenty-two papers on crime linkage, space–time clustering, near-repeats and Indian CAW.
-        Each stream of TRIVENI cites a source. The four prior GitHub systems used the same
-        corpus and still scored similarities or P(link). TRIVENI scores Λ.
+        Each SAMHITA channel cites a source. The six prior GitHub systems used the same corpus
+        and still scored pairs or joined a known docket. SAMHITA compiles tables from an empty
+        caseload.
       </p>
 
       <div className="mt-8 grid gap-3">

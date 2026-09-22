@@ -9,8 +9,7 @@ export function useUniverse(seed = 2026) {
 }
 
 /**
- * Full TRIVENI nest. Sync so first paint (SSR and hydration) already has
- * clusters, Moran and log-Λ AUC — no empty KPIs.
+ * SAMHITA + SAE atlas. Sync so first paint already has ARI and clusters.
  */
 export function useModel(kind: CrimeKind, seed = 2026) {
   const model = useMemo(() => getModel(kind, seed), [kind, seed]);

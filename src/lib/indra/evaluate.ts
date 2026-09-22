@@ -104,6 +104,20 @@ export function evaluateLinkage(pairs: LinkScore[]): EvalMetrics["linkage"] {
     nUnlinked,
     recallAt10: qn ? rec10 / qn : 0,
     mrr: qn ? mrr / qn : 0,
+    assignHit1: 0,
+    assignHit3: 0,
+    assignMrr: 0,
+    jaccardHit1: 0,
+    nQueries: 0,
+    versatileHit1: 0,
+    ari: 0,
+    greedyAri: 0,
+    singletonPrecision: 0,
+    recoveredSeries: 0,
+    nTables: 0,
+    nPool: 0,
+    overSeg: 0,
+    underSeg: 0,
   };
 }
 

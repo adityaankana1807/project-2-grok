@@ -1,66 +1,56 @@
-# TRIVENI — Typology-Conditional Likelihood Ratios for Indian Crime Linkage
+# SAMHITA — Infinite-Table Series Discovery for Indian Crime Linkage
 
-**Project 2.** A forensic case-linkage platform for Indian districts: NCRB-calibrated small-area risk, space–time scan clusters, and a typology-mixed likelihood ratio under FIR missingness and the IPC → BNS flip.
+**Project 2.** A forensic case-linkage platform for Indian districts: NCRB-calibrated small-area risk, space–time scan clusters, and a Chinese-restaurant compiler that opens or joins series tables under FIR missingness, MO drift, and the IPC → BNS flip.
 
 This is a methods lab, not an operational targeting tool. Counts are a seeded synthetic panel calibrated to public NCRB / Census / NFHS priors. They are not official police microdata. Reporting is not incidence.
 
-## Why a fifth algorithm
+## Why a seventh algorithm
 
-Four prior systems on the same Drive corpus still score similarities or `P(link | features)`:
+Six prior systems on the same Drive corpus still score a pair or join a *known* docket:
 
 | System | Repo | Fusion | Hole |
 | --- | --- | --- | --- |
-| ST-SAGE | `project-2-claude` | Logistic(Jaccard, Tonkin 2025, distance, time) | Marauder-only geometry |
-| INDRA | `project-2-grok` (prior) | Linear nest 0.26/0.16/0.34/0.12/0.12 | Authored weights, not an LR |
-| I-HSTMO-Link++ | `ihstmo-gemini-project-2` | Calibrated logistic + Louvain | Classifier, not Λ |
-| I-HSTMO baseline | `ihstmoindia-biddata-project-2-codex-1` | Logit on 7 similarities | Honest, still not an LR |
+| ST-SAGE | `project-2-claude` | Logistic(Jaccard, Tonkin 2025, distance, time) | Pair; marauder-only |
+| INDRA | `project-2-grok` (prior) | Linear nest 0.26/0.16/0.34/0.12/0.12 | Pair similarities |
+| I-HSTMO-Link++ | `ihstmo-gemini-project-2` | Calibrated logistic + Louvain | Louvain is post-hoc on pairs |
+| I-HSTMO baseline | `ihstmoindia-biddata-project-2-codex-1` | Logit on 7 similarities | Honest pair ranker |
+| TRIVENI | `project-2-grok` (prior) | Typology-mixture pairwise LR | Family block drops versatile serials |
+| ANVAYA | `project-2-grok` (prior) | Sequential BF + SPRT | Assignment to a gold docket |
 
-**TRIVENI** scores
+**SAMHITA** (संहिता — compiled collection) scores
 
 ```
-Λ = Σ_τ π(τ | d) · (Λ_desh(τ) Λ_kaal(τ) Λ_riti Λ_patch) / D
+P(join T) ∝ n_T · δ̄_T · BF(q → T_decayed)
+P(new)    ∝ α
 ```
 
-mixed over Halford-style `{forager, marauder, commuter}` kernels. Hollow FIRs send `Λ_riti → 1`. SAE clusters are a blocking index, not just a map colour.
+MAP: join if `log n_eff + log BF > log α`, else open. Occupancy is inflated by the NFHS-5 dark figure. MO counts decay with a 140-day half-life. Evaluation is Adjusted Rand Index on a mixed pool, not Hit@1.
 
-## Streams
+## Channels
 
-1. **Desh** — spatial LR at typology-specific `d0`
-2. **Kaal** — temporal LR, festival-stretched (Holi, Diwali, Navratri/Durga Puja)
-3. **Riti** — Dutta–Banik IFS × Tonkin 2025, gated by coverage
-4. **Patch** — SAE relative-risk concordance × Kulldorff co-membership
-5. **Copula** — saturating space–time dependence so Hawkes near-repeats are not double-counted
-6. **Blocking** — 3·d0 ∪ scan cluster ∪ NH/SH corridor ∪ rare tokens ∪ IPC/BNS family
+1. **Compiler** — Chinese-restaurant process, concentration α = 1.85
+2. **Occupancy** — `n_eff = n · δ̄` so Bihar tables are not over-opened
+3. **Drift** — Dirichlet weights `exp(−Δt / 140 d)` so burglary→CAW is a walk
+4. **Join BF** — Dirichlet–multinomial MO × typology geo × dark-dilated time × Tonkin 2011 family
+5. **Partition** — ARI, series recovery, singleton precision, over/under-segmentation
 
 ## Stack
 
 React 19, TanStack Start / Router, Tailwind v4, Zustand, Recharts.
 
-## Run locally
-
-```bash
-npm install
-npm run dev
-```
-
-```bash
-npm run typecheck
-npm run build
-```
-
 ## Routes
 
 | Path | View |
 | --- | --- |
-| `/` | District risk atlas, scan clusters, live log-Λ AUC |
-| `/algorithm` | Mixture LR, streams, four-prior comparison |
-| `/linkage` | Rank SAE-blocked candidates by log Λ |
-| `/series` | Eighteen typed planted series |
+| `/` | District risk atlas, live partition ARI |
+| `/algorithm` | CRP, occupancy, drift, seven-system table |
+| `/linkage` | Chronological stream: join or open |
+| `/series` | Twenty-two planted series with captured tables |
 | `/forecast` | Next-month hotspot watch list |
-| `/paper` | IMRaD methods preprint with live metrics |
+| `/paper` | IMRaD methods preprint with live ARI |
 | `/data` | NCRB priors and CSV export |
-| `/literature` | Drive corpus mapped onto TRIVENI streams |
+| `/literature` | Drive corpus mapped onto SAMHITA channels |
 
 ## Data note
 
-State CAW / murder / cyber / violent rates follow NCRB Crime in India 2022–2024. District centroids and urbanisation follow Census / NCP. Dark-figure multipliers follow NFHS-5. Eighteen planted serial series (forager / marauder / commuter) sit inside the synthetic caseload so ranking metrics can be scored. No victim, accused or FIR number is real.
+State CAW / murder / cyber / violent rates follow NCRB Crime in India 2022–2024. District centroids and urbanisation follow Census / NCP. Dark-figure multipliers follow NFHS-5. Twenty-two planted serial series sit inside the synthetic caseload with 80 matched singletons so partition metrics can be scored. No victim, accused or FIR number is real.

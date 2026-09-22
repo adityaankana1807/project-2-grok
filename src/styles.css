@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0c0d0b;
-  --color-foreground: #efe8d6;
-  --color-card: #141511;
-  --color-card-fg: #efe8d6;
-  --color-muted: #1c1d18;
-  --color-muted-foreground: #9a9588;
-  --color-border: #2a2b24;
-  --color-input: #2a2b24;
-  --color-primary: #d4b483;
-  --color-primary-foreground: #0c0d0b;
-  --color-secondary: #1c1d18;
-  --color-secondary-foreground: #efe8d6;
-  --color-accent: #d4b483;
-  --color-accent-foreground: #0c0d0b;
-  --color-destructive: #c45c4a;
-  --color-destructive-foreground: #efe8d6;
-  --color-ring: #d4b483;
-  --color-risk: #c45c4a;
-  --color-safe: #6a8f78;
-  --color-warn: #d4b483;
-  --color-ink: #0c0d0b;
-  --color-paper: #efe8d6;
-  --color-panel: #10110e;
+  --color-background: #16120c;
+  --color-foreground: #ede4d4;
+  --color-card: #1e1912;
+  --color-card-fg: #ede4d4;
+  --color-muted: #2a241c;
+  --color-muted-foreground: #a39886;
+  --color-border: #3d3428;
+  --color-input: #3d3428;
+  --color-primary: #d4c4a8;
+  --color-primary-foreground: #16120c;
+  --color-secondary: #2a241c;
+  --color-secondary-foreground: #ede4d4;
+  --color-accent: #d4c4a8;
+  --color-accent-foreground: #16120c;
+  --color-destructive: #b54a3c;
+  --color-destructive-foreground: #ede4d4;
+  --color-ring: #d4c4a8;
+  --color-risk: #b54a3c;
+  --color-safe: #6b8f71;
+  --color-warn: #c47a3a;
+  --color-ink: #16120c;
+  --color-paper: #ede4d4;
+  --color-panel: #1a1610;
 
   --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", serif;
   --font-sans: "Figtree", "Segoe UI", system-ui, sans-serif;
@@ -36,8 +36,8 @@
   --radius-xl: 24px;
   --radius: 12px;
 
-  --shadow-border: 0 0 0 1px rgba(239, 232, 214, 0.08);
-  --shadow-border-hover: 0 0 0 1px rgba(239, 232, 214, 0.14);
+  --shadow-border: 0 0 0 1px rgba(237, 228, 212, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(237, 228, 212, 0.14);
 }
 
 @layer base {
